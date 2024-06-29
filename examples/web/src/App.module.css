@@ -1,0 +1,4 @@
+.card {
+  border: 2px solid var(--border-contrast);
+  background-color: var(--background-secondary);
+}

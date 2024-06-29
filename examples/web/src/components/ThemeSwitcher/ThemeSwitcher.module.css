@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  gap: 32px;
+  justify-content: space-evenly;
+  border: 1px solid var(--border-contrast);
+  border-radius: 18px;
+}
+
+.puck {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  border-radius: 18px;
+  transition: all 0.5s;
+  left: 0;
+}
+
+.puck_light {
+  background-color: var(--background-default);
+}
+
+.puck_dark {
+  background-color: var(--background-default);
+  transform: translateX(100%);
+}
