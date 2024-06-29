@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react"
+import React, { useContext, useEffect, useMemo } from "react"
 
 type InferProps<TComponent> = TComponent extends React.ComponentType<infer TProps> ? TProps : never
 
@@ -134,7 +134,15 @@ export function createProper<TTheme extends object | undefined>(theme: TTheme): 
 
   return {
     ThemeProvider: ({ theme: providedTheme, children }) => {
-      return <ThemeContext.Provider value={providedTheme ?? theme}>{children}</ThemeContext.Provider>
+      const themeToUse = providedTheme ?? theme
+
+      useEffect(() => {
+        if (themeToUse) {
+          defineTheme(themeToUse)
+        }
+      }, [themeToUse])
+
+      return <ThemeContext.Provider value={themeToUse}>{children}</ThemeContext.Provider>
     },
     useTheme: () => useContext(ThemeContext),
     prop: prop,
