@@ -102,7 +102,7 @@ export function createProper<TTheme>(theme: TTheme): Proper<TTheme> {
       if (isPropable(Component)) {
         const Propable = createPropable(Component.Component)
 
-        Propable.props = Component.props
+        Propable.props = [...Component.props]
         Propable.props.push(moreProps)
 
         return Propable
