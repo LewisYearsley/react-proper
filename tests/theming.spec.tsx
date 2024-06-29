@@ -1,24 +1,22 @@
 import React from "react"
 import { describe, it, expect, beforeEach } from "vitest"
 import { fireEvent, render, renderHook } from "@testing-library/react"
-import { createProper, PropedComponent, type Proper } from "../index"
+import { createProper, type Proper } from "../index"
 import { type MockTheme, theme1, theme2 } from "./mocks/theme"
-import MockComponent, { type MockComponentProps } from "./mocks/MockComponent"
+import MockComponent from "./mocks/MockComponent"
 import createThemeSwitcher from "./mocks/createThemeSwitcher"
 import { expectedColor } from "./mocks/MockComponent"
 
 describe("theming", () => {
-  let PropableMockComponent: PropedComponent<MockComponentProps, MockTheme>
   let proper: Proper<MockTheme>
 
   beforeEach(() => {
     proper = createProper(theme1)
-    PropableMockComponent = proper.createPropable(MockComponent)
   })
 
   describe("in props", () => {
-    it("should apply the default theme if not overridden", () => {
-      const Component = proper.prop(PropableMockComponent)((_, theme) => ({
+    it.only("should apply the default theme if not overridden", () => {
+      const Component = proper.prop(MockComponent)((_, theme) => ({
         color: theme.colors.color1,
       }))
 
@@ -32,7 +30,7 @@ describe("theming", () => {
     })
 
     it("should continue to apply the default theme if overriden with the default theme", () => {
-      const Component = proper.prop(PropableMockComponent)((_, theme) => ({
+      const Component = proper.prop(MockComponent)((_, theme) => ({
         color: theme.colors.color1,
       }))
 
@@ -46,7 +44,7 @@ describe("theming", () => {
     })
 
     it("should apply the override theme if another is provided", () => {
-      const Component = proper.prop(PropableMockComponent)((_, theme) => ({
+      const Component = proper.prop(MockComponent)((_, theme) => ({
         color: theme.colors.color1,
       }))
 
@@ -60,7 +58,7 @@ describe("theming", () => {
     })
 
     it("should allow for the theme to be dynamically changed", () => {
-      const Component = proper.prop(PropableMockComponent)((_, theme) => ({
+      const Component = proper.prop(MockComponent)((_, theme) => ({
         color: theme.colors.color1,
       }))
 

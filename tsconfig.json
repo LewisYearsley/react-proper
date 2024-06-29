@@ -20,5 +20,5 @@
     "esModuleInterop": true,
     "moduleResolution": "Node"
   },
-  "exclude": ["node_modules", "dist", "tests", "vite.config.ts"]
+  "exclude": ["node_modules", "dist", "tests", "vite.config.ts", "examples"]
 }

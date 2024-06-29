@@ -1,6 +1,6 @@
 {
   "name": "react-proper",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A tiny package to create components with derived props and theming",
   "main": "./dist/cjs/index.js",
   "module": "./dist/index.js",

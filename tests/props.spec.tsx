@@ -1,27 +1,19 @@
 import React from "react"
 import { beforeEach, describe, it, expect } from "vitest"
-import { Proper, PropedComponent, createProper } from "../index"
+import { Proper, createProper } from "../index"
 import { type MockTheme, theme1 } from "./mocks/theme"
-import MockComponent, {
-  expectedArray,
-  expectedColor,
-  expectedObject,
-  expectedOptional,
-  type MockComponentProps,
-} from "./mocks/MockComponent"
+import MockComponent, { expectedArray, expectedColor, expectedOptional } from "./mocks/MockComponent"
 import { render } from "@testing-library/react"
 
 describe("props", () => {
-  let PropableMockComponent: PropedComponent<MockComponentProps, MockTheme>
   let proper: Proper<MockTheme>
 
   beforeEach(() => {
     proper = createProper(theme1)
-    PropableMockComponent = proper.createPropable(MockComponent)
   })
 
   it("should pass static props", () => {
-    const Component = proper.prop(PropableMockComponent)({
+    const Component = proper.prop(MockComponent)({
       color: "azul",
     })
 
@@ -32,7 +24,7 @@ describe("props", () => {
   })
 
   it("should override props with those directly passed in", () => {
-    const Component = proper.prop(PropableMockComponent)({
+    const Component = proper.prop(MockComponent)({
       color: "azul",
     })
 
@@ -43,7 +35,7 @@ describe("props", () => {
   })
 
   it("should pass dynamic props", () => {
-    const Component = proper.prop(PropableMockComponent)((props) => ({
+    const Component = proper.prop(MockComponent)((props) => ({
       color: props.optional ? "green" : "red",
     }))
 
@@ -59,7 +51,7 @@ describe("props", () => {
   })
 
   it("should be able to take additional props", () => {
-    const Component = proper.enableExtraProps<{ fancyColor: string }>().prop(PropableMockComponent)((props) => ({
+    const Component = proper.enableExtraProps<{ fancyColor: string }>().prop(MockComponent)((props) => ({
       color: props.fancyColor,
     }))
 
@@ -73,7 +65,7 @@ describe("props", () => {
   })
 
   it("should give precedence to the most top level wrapped props for static props", () => {
-    const Component = proper.prop(PropableMockComponent)({
+    const Component = proper.prop(MockComponent)({
       color: "blue",
     })
 
@@ -87,7 +79,7 @@ describe("props", () => {
   })
 
   it("should give precedence to the most top level wrapped props for dynamic props", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
     }))
 
@@ -101,7 +93,7 @@ describe("props", () => {
   })
 
   it("should give precedence to the most top level wrapped props for a mix of dynamic and static props where the top level is dynamic", () => {
-    const Component = proper.prop(PropableMockComponent)({
+    const Component = proper.prop(MockComponent)({
       color: "blue",
     })
 
@@ -115,7 +107,7 @@ describe("props", () => {
   })
 
   it("should give precedence to the most top level wrapped props for a mix of dynamic and static props where the top level is static", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
     }))
 
@@ -129,7 +121,7 @@ describe("props", () => {
   })
 
   it("should merge array props", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
       array: ["one"],
     }))
@@ -145,7 +137,7 @@ describe("props", () => {
   })
 
   it("should merge object props", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
       object: {
         foo: "bar",
@@ -166,7 +158,7 @@ describe("props", () => {
   })
 
   it("should cope with the same prop on multiple wrappings", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
     }))
 
@@ -180,7 +172,7 @@ describe("props", () => {
   })
 
   it("should merge differing props on multiple wrappings", () => {
-    const Component = proper.prop(PropableMockComponent)(() => ({
+    const Component = proper.prop(MockComponent)(() => ({
       color: "blue",
     }))
 
@@ -192,5 +184,25 @@ describe("props", () => {
 
     expect(queryByText(expectedColor("blue"))).not.toBe(null)
     expect(queryByText(expectedOptional(false))).not.toBe(null)
+  })
+
+  it("should allow the same propable component to be used over multiple instances", () => {
+    const Component = proper.prop(MockComponent)(() => ({
+      color: "blue",
+    }))
+
+    const Component2 = proper.prop(MockComponent)(() => ({
+      color: "red",
+    }))
+
+    const { queryByText } = render(
+      <>
+        <Component />
+        <Component2 />
+      </>
+    )
+
+    expect(queryByText(expectedColor("blue"))).not.toBe(null)
+    expect(queryByText(expectedColor("red"))).not.toBe(null)
   })
 })

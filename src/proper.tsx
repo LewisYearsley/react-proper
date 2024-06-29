@@ -9,6 +9,8 @@ type PropsCallback<TProps, TTheme, TReturn extends Partial<TProps> = Partial<TPr
 
 export type PropedComponent<TProps, TTheme> = React.ComponentType<TProps> & {
   props: (PropsCallback<TProps, TTheme> | Partial<TProps>)[]
+  isPropped: true
+  Component: React.ComponentType<TProps>
 }
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
@@ -23,9 +25,13 @@ type ProvidePropCallback<TTheme, TComponent extends PropedComponent<any, TTheme>
   props: THandledProps | PropsCallback<AppendExtraProps<TComponent, TExtraProps>, TTheme, THandledProps>
 ) => PropedComponent<PartialBy<AppendExtraProps<TComponent, TExtraProps>, keyof THandledProps>, TTheme>
 
-type PropCallback<TTheme, TExtraProps> = <TComponent extends PropedComponent<any, TTheme>>(
+type PropCallback<TTheme, TExtraProps> = <TComponent extends PropedComponent<any, TTheme> | React.ComponentType<any>>(
   Component: TComponent
-) => ProvidePropCallback<TTheme, TComponent, TExtraProps>
+) => ProvidePropCallback<
+  TTheme,
+  TComponent extends React.ComponentType<infer TProps> ? PropedComponent<TProps, TTheme> : TComponent,
+  TExtraProps
+>
 
 export type Proper<TTheme> = {
   useTheme: () => TTheme
@@ -34,7 +40,6 @@ export type Proper<TTheme> = {
       theme?: TTheme
     }>
   >
-  createPropable: <TProps>(Component: React.ComponentType<TProps>) => PropedComponent<TProps, TTheme>
   prop: PropCallback<TTheme, undefined>
   enableExtraProps: <TExtraProps = undefined>() => {
     prop: PropCallback<TTheme, TExtraProps>
@@ -63,11 +68,51 @@ function mergeProps<TProps extends Record<string, any>>(propsA: TProps, propsB: 
 export function createProper<TTheme>(theme: TTheme): Proper<TTheme> {
   const ThemeContext = React.createContext(theme)
 
+  function isPropable<TProps, TTheme>(
+    Component: React.ComponentType<TProps>
+  ): Component is PropedComponent<TProps, TTheme> {
+    return "isPropped" in Component
+  }
+
+  function createPropable<TProps>(Component: React.ComponentType<TProps>): PropedComponent<TProps, TTheme> {
+    const Propable: PropedComponent<InferProps<typeof Component>, TTheme> = (props) => {
+      const providedTheme = useContext(ThemeContext)
+      const resolvedProps = useMemo(() => {
+        return Propable.props.reduce<Partial<InferProps<typeof Component>>>((resolved, prop) => {
+          return mergeProps(resolved, typeof prop === "function" ? prop(props, providedTheme) : prop)
+        }, {})
+      }, [props, providedTheme])
+
+      return <Component {...resolvedProps} {...props} />
+    }
+
+    Propable.displayName = `Propable(${Component.displayName ?? "Anonymous"})`
+
+    Propable.isPropped = true
+
+    Propable.props = []
+
+    Propable.Component = Component
+
+    return Propable
+  }
+
   const prop: Proper<TTheme>["prop"] = (Component) => {
     return (moreProps) => {
-      Component.props.push(moreProps)
+      if (isPropable(Component)) {
+        const Propable = createPropable(Component.Component)
 
-      return Component
+        Propable.props = Component.props
+        Propable.props.push(moreProps)
+
+        return Propable
+      } else {
+        const Propable = createPropable(Component)
+
+        Propable.props.push(moreProps)
+
+        return Propable
+      }
     }
   }
 
@@ -76,24 +121,6 @@ export function createProper<TTheme>(theme: TTheme): Proper<TTheme> {
       return <ThemeContext.Provider value={providedTheme ?? theme}>{children}</ThemeContext.Provider>
     },
     useTheme: () => useContext(ThemeContext),
-    createPropable: (Component) => {
-      const Propable: PropedComponent<InferProps<typeof Component>, TTheme> = (props) => {
-        const providedTheme = useContext(ThemeContext)
-        const resolvedProps = useMemo(() => {
-          return Propable.props.reduce<Partial<InferProps<typeof Component>>>((resolved, prop) => {
-            return mergeProps(resolved, typeof prop === "function" ? prop(props, providedTheme) : prop)
-          }, {})
-        }, [props, providedTheme])
-
-        return <Component {...resolvedProps} {...props} />
-      }
-
-      Propable.displayName = `Propable(${Component.displayName ?? "Anonymous"})`
-
-      Propable.props = []
-
-      return Propable
-    },
     prop: prop,
     enableExtraProps: () => ({
       prop,
