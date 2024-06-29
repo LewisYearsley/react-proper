@@ -66,21 +66,23 @@ function mergeProps<TProps extends Record<string, any>>(propsA: TProps, propsB: 
 }
 
 function defineTheme<TTheme extends object>(theme: TTheme, namespace = ""): void {
-  Object.entries(theme).forEach(([key, value]) => {
-    const newNamespace = !namespace ? key : `${namespace}-${key}`
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
+    Object.entries(theme).forEach(([key, value]) => {
+      const newNamespace = !namespace ? key : `${namespace}-${key}`
 
-    if (typeof value === "object") {
-      defineTheme(value, newNamespace)
-    } else {
-      document.documentElement.style.setProperty(`--${newNamespace}`, value)
-    }
-  })
+      if (typeof value === "object") {
+        defineTheme(value, newNamespace)
+      } else {
+        document.documentElement.style.setProperty(`--${newNamespace}`, value)
+      }
+    })
+  }
 }
 
 export function createProper<TTheme extends object | undefined>(theme: TTheme): Proper<TTheme> {
   const ThemeContext = React.createContext(theme)
 
-  if (typeof window !== "undefined" && typeof document !== "undefined" && theme !== undefined) {
+  if (theme) {
     defineTheme(theme)
   }
 
