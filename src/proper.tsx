@@ -65,8 +65,24 @@ function mergeProps<TProps extends Record<string, any>>(propsA: TProps, propsB: 
   }, propsB)
 }
 
-export function createProper<TTheme>(theme: TTheme): Proper<TTheme> {
+function defineTheme<TTheme extends object>(theme: TTheme, namespace = ""): void {
+  Object.entries(theme).forEach(([key, value]) => {
+    const newNamespace = !namespace ? key : `${namespace}-${key}`
+
+    if (typeof value === "object") {
+      defineTheme(value, newNamespace)
+    } else {
+      document.documentElement.style.setProperty(`--${newNamespace}`, value)
+    }
+  })
+}
+
+export function createProper<TTheme extends object | undefined>(theme: TTheme): Proper<TTheme> {
   const ThemeContext = React.createContext(theme)
+
+  if (typeof window !== "undefined" && typeof document !== "undefined" && theme !== undefined) {
+    defineTheme(theme)
+  }
 
   function isPropable<TProps, TTheme>(
     Component: React.ComponentType<TProps>

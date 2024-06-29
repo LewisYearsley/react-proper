@@ -7,3 +7,5 @@ index.tsx
 rollup.config.js
 tsconfig.json
 vite.config.ts
+examples
+coverage

@@ -15,7 +15,7 @@ describe("theming", () => {
   })
 
   describe("in props", () => {
-    it.only("should apply the default theme if not overridden", () => {
+    it("should apply the default theme if not overridden", () => {
       const Component = proper.prop(MockComponent)((_, theme) => ({
         color: theme.colors.color1,
       }))

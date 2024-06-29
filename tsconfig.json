@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "lib": ["ESNext"],
+    "target": "ES5",
+    "lib": ["ESNext", "DOM"],
     "allowJs": false,
     "alwaysStrict": true,
     "allowUnreachableCode": false,
